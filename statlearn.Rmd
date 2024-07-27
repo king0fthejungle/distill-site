@@ -1,0 +1,69 @@
+---
+title: "Statistical Learning"
+description: |
+  An explanation of Statistical Learning 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(ggplot2)
+set.seed(1999)
+```
+
+## A Primer on Probability
+
+The probability of an event is a measurement of how likely it is to occur, and ranges from 0 to 1. 
+
+A probability of 0 means the event will not occur, and a probability of 1 means the event will surely occur.
+
+Take a coin flip - the probability of flipping heads is 0.5, this is because out of two possible outcomes heads is one of them: 1/2 = 0.5. Each outcome then has a 50% chance of happening. However a small sample size we may not equal results between heads and tails:
+
+```{r}
+number_flips <- 10
+
+# Simulate coin flips (0 for tails, 1 for heads)
+coin_flips <- sample(c(0, 1), size = number_flips, replace = TRUE)
+
+coin_flips_factor <- factor(coin_flips, labels = c("Tails", "Heads"))
+coin_flips_df <- data.frame(coin_flips_factor)
+
+ggplot(data = coin_flips_df, aes(x = coin_flips_factor, fill = coin_flips_factor)) +
+  geom_bar() +
+  geom_text(stat = 'count', aes(label = after_stat(count)), vjust = -0.5) +
+  labs(title = "Histogram of Coin Flips", x = "Outcome", y = "Frequency") +
+  scale_fill_manual(values = c("Heads" = "red", "Tails" = "blue")) +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+Though if we repeat this coin flip many more times we will begin to see that the frequency of our observations will match the expected probability of 0.5:
+
+```{r}
+number_flips <- 100000
+
+# Simulate coin flips (0 for tails, 1 for heads)
+coin_flips <- sample(c(0, 1), size = number_flips, replace = TRUE)
+
+coin_flips_factor <- factor(coin_flips, labels = c("Tails", "Heads"))
+coin_flips_df <- data.frame(coin_flips_factor)
+
+ggplot(data = coin_flips_df, aes(x = coin_flips_factor, fill = coin_flips_factor)) +
+  geom_bar() +
+  geom_text(stat = 'count', aes(label = after_stat(count)), vjust = -0.5) +
+  labs(title = "Histogram of Coin Flips", x = "Outcome", y = "Frequency") +
+  scale_fill_manual(values = c("Heads" = "red", "Tails" = "blue")) +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+A coin flip results in a binary outcome where there are only two possible results, and we can more or less be certain that it would be impossible to accurately predict these outcomes. However in the real world, we have binary outcomes everywhere and with the help of probability it is possible to predict these outcomes with high accuracy. 
+
+here are few examples:
+
+- Will someone buy a product?
+- Will a sports team win or lose a game?
+- Will a customer decide to stop doing business?
+
+## What is Statistical Modeling 
+
+[Data Source](https://www.kaggle.com/datasets/mnassrib/telecom-churn-datasets/data)

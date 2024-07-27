@@ -88,26 +88,29 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 
 
   <!--radix_placeholder_meta_tags-->
-  <title>Brady Falor's Porfolio</title>
+  <title>Brady Falor's Porfolio: Statistical Learning</title>
 
+  <meta property="description" itemprop="description" content="An explanation of Statistical Learning"/>
 
 
 
   <!--  https://developers.facebook.com/docs/sharing/webmasters#markup -->
-  <meta property="og:title" content="Brady Falor&#39;s Porfolio"/>
+  <meta property="og:title" content="Brady Falor&#39;s Porfolio: Statistical Learning"/>
   <meta property="og:type" content="article"/>
+  <meta property="og:description" content="An explanation of Statistical Learning"/>
   <meta property="og:locale" content="en_US"/>
   <meta property="og:site_name" content="Brady Falor&#39;s Porfolio"/>
 
   <!--  https://dev.twitter.com/cards/types/summary -->
   <meta property="twitter:card" content="summary"/>
-  <meta property="twitter:title" content="Brady Falor&#39;s Porfolio"/>
+  <meta property="twitter:title" content="Brady Falor&#39;s Porfolio: Statistical Learning"/>
+  <meta property="twitter:description" content="An explanation of Statistical Learning"/>
 
   <!--/radix_placeholder_meta_tags-->
   <!--radix_placeholder_rmarkdown_metadata-->
 
   <script type="text/json" id="radix-rmarkdown-metadata">
-  {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","site"]}},"value":[{"type":"character","attributes":{},"value":["Brady Falor's Porfolio"]},{"type":"character","attributes":{},"value":["distill::distill_website"]}]}
+  {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","description"]}},"value":[{"type":"character","attributes":{},"value":["Statistical Learning"]},{"type":"character","attributes":{},"value":["An explanation of Statistical Learning "]}]}
   </script>
   <!--/radix_placeholder_rmarkdown_metadata-->
   <!--radix_placeholder_navigation_in_header-->
@@ -2116,7 +2119,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <!--radix_placeholder_front_matter-->
 
 <script id="distill-front-matter" type="text/json">
-{"title":"Brady Falor's Porfolio","authors":[]}
+{"title":"Statistical Learning","description":"An explanation of Statistical Learning","authors":[]}
 </script>
 
 <!--/radix_placeholder_front_matter-->
@@ -2139,15 +2142,35 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <!--/radix_placeholder_site_before_body-->
 
 <div class="d-title">
-<h1>Brady Falor’s Porfolio</h1>
+<h1>Statistical Learning</h1>
 
 <!--radix_placeholder_categories-->
 <!--/radix_placeholder_categories-->
-
+<p><p>An explanation of Statistical Learning</p></p>
 </div>
 
 
 <div class="d-article">
+<h2 id="a-primer-on-probability">A Primer on Probability</h2>
+<p>The probability of an event is a measurement of how likely it is to occur, and ranges from 0 to 1.</p>
+<p>A probability of 0 means the event will not occur, and a probability of 1 means the event will surely occur.</p>
+<p>Take a coin flip - the probability of flipping heads is 0.5, this is because out of two possible outcomes heads is one of them: 1/2 = 0.5. Each outcome then has a 50% chance of happening. However a small sample size we may not equal results between heads and tails:</p>
+<div class="layout-chunk" data-layout="l-body">
+<p><img src="statlearn_files/figure-html5/unnamed-chunk-1-1.png" width="624" /></p>
+</div>
+<p>Though if we repeat this coin flip many more times we will begin to see that the frequency of our observations will match the expected probability of 0.5:</p>
+<div class="layout-chunk" data-layout="l-body">
+<p><img src="statlearn_files/figure-html5/unnamed-chunk-2-1.png" width="624" /></p>
+</div>
+<p>A coin flip results in a binary outcome where there are only two possible results, and we can more or less be certain that it would be impossible to accurately predict these outcomes. However in the real world, we have binary outcomes everywhere and with the help of probability it is possible to predict these outcomes with high accuracy.</p>
+<p>here are few examples:</p>
+<ul>
+<li>Will someone buy a product?</li>
+<li>Will a sports team win or lose a game?</li>
+<li>Will a customer decide to stop doing business?</li>
+</ul>
+<h2 id="what-is-statistical-modeling">What is Statistical Modeling</h2>
+<p><a href="https://www.kaggle.com/datasets/mnassrib/telecom-churn-datasets/data">Data Source</a></p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->

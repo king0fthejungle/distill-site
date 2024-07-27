@@ -1,0 +1,97 @@
+---
+title: "Logistic Regression"
+description: |
+  Explaining and using Logistic Regression 
+---
+
+```{r}
+library(tidyverse)
+library(tidymodels)
+```
+
+
+
+```{r}
+train_df <- read_csv("~/STA 631/distill-site/data/churn-bigml-80.csv")
+test_df <- read_csv("~/STA 631/distill-site/data/churn-bigml-20.csv")
+```
+
+```{r}
+glimpse(train_df)
+```
+```{r}
+library(naniar)
+
+vis_miss(train_df)
+```
+There is no missing data! Excellent. 
+
+Now lets do preprocessing
+
+```{r}
+train_df <- train_df |>
+  mutate(Churn = if_else(Churn, 1, 0))
+
+# Create the recipe
+rec <- recipe(Churn ~ ., data = train_df) %>%
+  step_dummy(all_nominal_predictors(), one_hot = FALSE) %>% # Dummy encode categorical variables
+  step_normalize(all_numeric_predictors()) %>%              # Standardize continuous variables
+  step_corr(all_numeric_predictors(), threshold = 0.9) %>%  # Remove highly correlated variables
+  step_log(all_outcomes(), offset = 1) %>%                  # Log transform skewed distributions
+  prep()
+
+# Apply the recipe to the data
+train_processed <- bake(rec, new_data = train_df)
+
+```
+
+
+```{r}
+# Create the logistic regression model using glm
+model <- glm(Churn ~ ., data = train_processed, family = binomial())
+
+# View the model summary
+summary(model)
+```
+```{r}
+test_df <- test_df %>%
+  mutate(Churn = if_else(Churn, 1, 0))
+
+
+# Transform the test data using the same recipe
+test_processed <- bake(rec, new_data = test_df)
+
+# Make predictions on the test data
+# Make predictions on the test data (excluding the Churn column)
+predictions <- predict(model, newdata = select(test_processed, -Churn), type = "response")
+
+# Add predictions and actual Churn back to the test data frame for evaluation
+test_df <- test_df %>%
+  mutate(predicted_Churn = predictions)
+
+```
+
+```{r}
+library(caret)
+library(pROC)
+library(MLmetrics)
+
+
+# Binarize predictions using a threshold of 0.5
+test_df <- test_df %>%
+  mutate(predicted_Churn_binary = if_else(predicted_Churn > 0.5, 1, 0))
+
+# Confusion Matrix
+conf_matrix <- confusionMatrix(as.factor(test_df$predicted_Churn_binary), as.factor(test_df$Churn))
+print(conf_matrix)
+
+# F1 Score
+f1_score <- F1_Score(test_df$Churn, test_df$predicted_Churn_binary)
+print(paste("F1 Score:", f1_score))
+
+# AUC
+roc_obj <- roc(test_df$Churn, test_df$predicted_Churn)
+auc_value <- auc(roc_obj)
+print(paste("AUC:", auc_value))
+```
+
