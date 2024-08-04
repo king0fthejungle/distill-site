@@ -90,27 +90,27 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <!--radix_placeholder_meta_tags-->
   <title>Brady Falor's Porfolio: Statistical Learning</title>
 
-  <meta property="description" itemprop="description" content="An explanation of Statistical Learning"/>
+  <meta property="description" itemprop="description" content="An explanation of how probability lays the foundation for statistical learning"/>
 
 
 
   <!--  https://developers.facebook.com/docs/sharing/webmasters#markup -->
   <meta property="og:title" content="Brady Falor&#39;s Porfolio: Statistical Learning"/>
   <meta property="og:type" content="article"/>
-  <meta property="og:description" content="An explanation of Statistical Learning"/>
+  <meta property="og:description" content="An explanation of how probability lays the foundation for statistical learning"/>
   <meta property="og:locale" content="en_US"/>
   <meta property="og:site_name" content="Brady Falor&#39;s Porfolio"/>
 
   <!--  https://dev.twitter.com/cards/types/summary -->
   <meta property="twitter:card" content="summary"/>
   <meta property="twitter:title" content="Brady Falor&#39;s Porfolio: Statistical Learning"/>
-  <meta property="twitter:description" content="An explanation of Statistical Learning"/>
+  <meta property="twitter:description" content="An explanation of how probability lays the foundation for statistical learning"/>
 
   <!--/radix_placeholder_meta_tags-->
   <!--radix_placeholder_rmarkdown_metadata-->
 
   <script type="text/json" id="radix-rmarkdown-metadata">
-  {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","description"]}},"value":[{"type":"character","attributes":{},"value":["Statistical Learning"]},{"type":"character","attributes":{},"value":["An explanation of Statistical Learning "]}]}
+  {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","description"]}},"value":[{"type":"character","attributes":{},"value":["Statistical Learning"]},{"type":"character","attributes":{},"value":["An explanation of how probability lays the foundation for statistical learning"]}]}
   </script>
   <!--/radix_placeholder_rmarkdown_metadata-->
   <!--radix_placeholder_navigation_in_header-->
@@ -2119,7 +2119,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <!--radix_placeholder_front_matter-->
 
 <script id="distill-front-matter" type="text/json">
-{"title":"Statistical Learning","description":"An explanation of Statistical Learning","authors":[]}
+{"title":"Statistical Learning","description":"An explanation of how probability lays the foundation for statistical learning","authors":[]}
 </script>
 
 <!--/radix_placeholder_front_matter-->
@@ -2133,7 +2133,8 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <a href="index.html">Home</a>
 <a href="about.html">About</a>
 <a href="statlearn.html">Statistical Learning</a>
-<a href="logistic.html">Logistic Regression</a>
+<a href="logistic.html">Predicting Churn with Logistic Regression</a>
+<a href="STA631Reflection.html">STA 631</a>
 <a href="javascript:void(0);" class="nav-toggle">&#9776;</a>
 </div>
 </nav>
@@ -2147,12 +2148,13 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 
 <!--radix_placeholder_categories-->
 <!--/radix_placeholder_categories-->
-<p><p>An explanation of Statistical Learning</p></p>
+<p><p>An explanation of how probability lays the foundation for statistical learning</p></p>
 </div>
 
 
 <div class="d-article">
-<h2 id="a-primer-on-probability">A Primer on Probability</h2>
+<h1 id="describe-probability-as-a-foundation-of-statistical-modeling-including-inference-and-maximum-likelihood-estimation">Describe probability as a foundation of statistical modeling, including inference and maximum likelihood estimation</h1>
+<h2 id="a-primer-on-probability-using-a-coin-flip">A Primer on Probability using a coin flip</h2>
 <p>The probability of an event is a measurement of how likely it is to occur, and ranges from 0 to 1.</p>
 <p>A probability of 0 means the event will not occur, and a probability of 1 means the event will surely occur.</p>
 <p>Take a coin flip - the probability of flipping heads is 0.5, this is because out of two possible outcomes heads is one of them: 1/2 = 0.5. Each outcome then has a 50% chance of happening. However a small sample size we may not equal results between heads and tails:</p>
@@ -2163,16 +2165,33 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <div class="layout-chunk" data-layout="l-body">
 <p><img src="statlearn_files/figure-html5/unnamed-chunk-2-1.png" width="624" /></p>
 </div>
-<p>A coin flip results in a binary outcome where there are only two possible results, and we can more or less be certain that it would be impossible to accurately predict these outcomes. However in the real world, we have binary outcomes everywhere and with the help of probability it is possible to predict these outcomes with high accuracy.</p>
-<p>here are few examples:</p>
-<ul>
-<li>Will someone buy a product?</li>
-<li>Will a sports team win or lose a game?</li>
-<li>Will a customer decide to stop doing business?</li>
-</ul>
-<h2 id="what-is-statistical-modeling">What is Statistical Modeling</h2>
-<p><a href="https://www.kaggle.com/datasets/mnassrib/telecom-churn-datasets/data">Data Source</a></p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<p>A coin flip results in a binary outcome where there are only two possible results: heads or tails. While we can be certain it would be impossible to accurately predict these outcome of each individual flip, we can be confident about predicting the aggregate results of many flips. For example if we flip a coin 100,000 times we can easily approximate that about 50,000 will be heads, and about 50,000 will be tails. This an exmaple of the concept commonly shared as “regression to the mean”.</p>
+<h2 id="probability-distributions">Probability Distributions</h2>
+<p>Lets simulate rolling 6-sided dice 10 times, each time we will calculate the sum of rolling both dice and store this sum away. Then we will count the relative frequencies of each sum and visualize them with a histogram.</p>
+<div class="layout-chunk" data-layout="l-body">
+<p><img src="statlearn_files/figure-html5/unnamed-chunk-3-1.png" width="624" /></p>
+</div>
+<p>Here we can be assured that the results of the dice rolls are quite random, however what if we repeat this experiment but instead roll the dice 10,000 times?</p>
+<div class="layout-chunk" data-layout="l-body">
+<p><img src="statlearn_files/figure-html5/unnamed-chunk-4-1.png" width="624" /></p>
+</div>
+<p>Now we see that the dice rolls are in-fact not random and there is a discernable pattern, called the “normal distribution”. This normal distribution is result of the rules outlined in the Central Limit Theorem. The Central Limit Theorem states that regardless of the original distribution of a random variable (result of a dice roll) the distribution of the sample mean will approach a normal distribution as the sample size becomes large.</p>
+<h2 id="statistical-inference">Statistical Inference</h2>
+<p>Now lets assume you are tasked with predicting the sum of a the roll of two dice. After viewing the graph, we can expect that because 7 has the greatest relative frequency, it has the highest probability of occurring.</p>
+<p>We can perform a t-test to generate a 95% confidence interval on our sets of sums to confirm this:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre><code>[1] &quot;95% Confidence Interval for the Mean of Dice Roll Sums: 5.61 to 9.39&quot;</code></pre>
+</div>
+<p>Since 7 is the only whole-number that falls within the 95% confidence interval range, we can make a statistical inference that 7 is the prediction that gives use the best odds of being correct. This is the foundation for which statistical models are built upon.</p>
+<h2 id="maximum-likelihood-estimation">Maximum Likelihood Estimation</h2>
+<p>The concept of Maximum Likelihood is an idea that the parameters of a statistical model can be estimated. Using the probability density of each data point (in our case a roll of two dice), we can measure how likely it is to be observed with various parameter values (in our case we can focus on the mean).</p>
+<p>We are confident that our data follows a normal distribution, thus we can simply take the sample mean, and sample standard deviation to maximize the likelihood functions (which are outside the scope of this document).</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre><code>[1] &quot;MLE Estimate of Mean: 7.5&quot;</code></pre>
+<pre><code>[1] &quot;MLE Estimate of Standard Deviation: 2.64&quot;</code></pre>
+</div>
+<p>Given our maximum likelihood estimate for the mean is about 7, we can again confirm that a prediction of 7 would be prudent. Now we have a simple understand of how probability lays the foundation for statistical modeling, and a more complex example using logistic regression can be found on the Logistic page of this site.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>

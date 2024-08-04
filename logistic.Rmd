@@ -4,12 +4,49 @@ description: |
   Explaining and using Logistic Regression 
 ---
 
+# Introduction:
+
+This website is built using distill and R, and as you progress you will notice bit of R code that help me to fit and assess statistical models to solve the overall problem. 
+
+Churn is the rate at which clients or customers stop doing business with a company over time. A common problem in data science is to predict churn.
+
+There are two states a customer can be in, if they are still doing business they have not churned (Churn = FALSE or 0), if they are no longer doing business then they have churned (Churn = TRUE or 1).
+
+# Applying the appropriate generalized linear model 
+
+Given we have a data set that includes other characteristics (independent variables, X) about each customer and whether or not they have churned, we can model this relationship using logistic regression as so:
+
+The logistic regression model predicts the probability \( P(Y=1) \) of the dependent variable \( Churn \) being 1 (or True), given the independent variables \( X_1, X_2, \ldots, X_n \). The equation is:
+
+$$
+P(Churn=1|X) = \frac{1}{1 + e^{-(\beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_n X_n)}}
+$$
+
+Where:
+- \( P(Y=1|X) \) is the probability of \( Y \) being 1 given \( X \).
+- \( \beta_0 \) is the intercept.
+- \( \beta_1, \beta_2, \ldots, \beta_n \) are the coefficients of the independent variables \( X_1, X_2, \ldots, X_n \).
+- \( e \) is the base of the natural logarithm.
+
+The logistic function (also called the sigmoid function) is used to map the predicted values to probabilities.
+
+$$
+P(Churn=1|X) = \sigma(\beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_n X_n)
+$$
+
+Where \( \sigma(z) \) is the sigmoid function defined as:
+
+$$
+\sigma(z) = \frac{1}{1 + e^{-z}}
+$$
+
 ```{r}
 library(tidyverse)
 library(tidymodels)
+
+# Model evaluation
+library(dplyr)
 ```
-
-
 
 ```{r}
 train_df <- read_csv("~/STA 631/distill-site/data/churn-bigml-80.csv")
@@ -19,6 +56,21 @@ test_df <- read_csv("~/STA 631/distill-site/data/churn-bigml-20.csv")
 ```{r}
 glimpse(train_df)
 ```
+
+```{r}
+# removing white space from column names
+names(train_df) <- gsub(" ", "_", names(train_df))
+names(test_df) <- gsub(" ", "_", names(test_df))
+
+# Print modified column names
+print(colnames(train_df))
+```
+
+
+```{r}
+table(train_df$Churn)
+```
+
 ```{r}
 library(naniar)
 
@@ -26,72 +78,166 @@ vis_miss(train_df)
 ```
 There is no missing data! Excellent. 
 
-Now lets do preprocessing
+# Conduct Model Selection from a set of candidate models
+
+The goal of this section is to perform subset selection where we identify a subset of predictors that are related to the response variable. 
+
+First lets perform preprocessing, lets use a recipe to one-hot encode our variables:
 
 ```{r}
 train_df <- train_df |>
   mutate(Churn = if_else(Churn, 1, 0))
 
-# Create the recipe
-rec <- recipe(Churn ~ ., data = train_df) %>%
-  step_dummy(all_nominal_predictors(), one_hot = FALSE) %>% # Dummy encode categorical variables
-  step_normalize(all_numeric_predictors()) %>%              # Standardize continuous variables
-  step_corr(all_numeric_predictors(), threshold = 0.9) %>%  # Remove highly correlated variables
-  step_log(all_outcomes(), offset = 1) %>%                  # Log transform skewed distributions
+
+rec <- recipe(Churn ~ ., data = train_df) |>
+  step_dummy(all_nominal_predictors(), one_hot = FALSE) |> # Dummy encode categorical variables
   prep()
 
 # Apply the recipe to the data
 train_processed <- bake(rec, new_data = train_df)
-
 ```
 
+### Training a Model
 
-```{r}
+Now lets train a model with everything to see how it performs:
+
+```{r, warning=FALSE}
 # Create the logistic regression model using glm
 model <- glm(Churn ~ ., data = train_processed, family = binomial())
-
-# View the model summary
 summary(model)
 ```
+
+### Subset Selection
+
+Our model has an AIC of 1779.2, lets now see if we can improve it with a subset selection algorithm:
+
+Although we have a binary classification problem where we would like to perform logisitic regression, we can still use regsubsets from the leaps package to help use understand what subsets would work best for linear regression models.
+
+Because we have p = 20 predictors, exhaustive best subset selection is not reasonable. 
+
 ```{r}
-test_df <- test_df %>%
+library(leaps)
+
+regfit <- regsubsets(Churn ~ ., data = train_processed, nvmax = 50, method = "backward")
+summary_reg_fit <- summary(regfit)
+```
+
+Now that we have our 50 candidate models, lets train logistic regression models on each subset that regsubsets built for us using linear regression models, and select the model that results in the lowest AIC value. 
+
+```{r, warning=FALSE}
+best_models <- as.data.frame(summary_reg_fit$which)
+best_models <- best_models[, -1]
+
+# Init Empty AIC Vector
+aic_values <- numeric(nrow(best_models))
+
+for (i in 1:nrow(best_models)) {
+  current_model <- as.logical(best_models[i, ]) # Gives us a binary vector
+
+  selected_predictors <- names(best_models)[current_model]  # Only select the columns from the candidate model
+  
+  # Train the logistic regression model
+  formula <- as.formula(paste("Churn ~", paste(selected_predictors, collapse = " + ")))
+  fit <- glm(formula, data = train_processed, family = binomial)
+  
+  # store the AIC of the model
+  aic_values[i] <- AIC(fit)
+}
+
+# select the model with the lowest AIC
+best_model_index <- which.min(aic_values)
+best_model <- as.logical(best_models[best_model_index, ])
+
+# Re-train a logisitc regression model using the best subset 
+selected_best_predictors <- names(best_models)[best_model]
+best_formula <- as.formula(paste("Churn ~", paste(selected_best_predictors, collapse = " + ")))
+best_fit <- glm(best_formula, data = train_processed, family = binomial)
+
+summary(best_fit)
+```
+
+With a simple subset selection we were able to reduce the AIC from 1779.2 to 1725.7, indicating that our model selection helped us to find a better model along with reducing the data needed to make predictions. 
+
+# Communicating Results to a general audience
+
+### Cross Validation
+
+Lets now do K-Fold cross validation, in this case K=10. :
+
+```{r, warning=FALSE}
+library(boot)
+
+cv_error <- rep(0,10)
+
+for (i in 1:10){
+  logistic_model <- glm(best_formula, data = train_processed, family = binomial())
+  cv_error[i] <- cv.glm(train_processed, logistic_model, K = 10)$delta[1]
+}
+
+cv_error
+```
+
+Our estimated test errors for each fold are all very close in value, which tells us that this model will generalize should a test set not be available, luckily we have a test set available...
+
+### Processing Test
+
+
+```{r}
+table(test_df$Churn)
+```
+
+```{r}
+test_df <- test_df |>
   mutate(Churn = if_else(Churn, 1, 0))
 
-
-# Transform the test data using the same recipe
 test_processed <- bake(rec, new_data = test_df)
-
-# Make predictions on the test data
-# Make predictions on the test data (excluding the Churn column)
-predictions <- predict(model, newdata = select(test_processed, -Churn), type = "response")
-
-# Add predictions and actual Churn back to the test data frame for evaluation
-test_df <- test_df %>%
-  mutate(predicted_Churn = predictions)
-
 ```
+
+Making Predictions
 
 ```{r}
-library(caret)
-library(pROC)
-library(MLmetrics)
+# Make predictions on the test data (excluding the Churn column)
+predictions <- predict(best_fit, newdata = dplyr::select(test_processed, -Churn), type = "response")
 
+# Add predictions and actual Churn back to the test data frame for evaluation
+test_df <- test_df |>
+  mutate(predicted_Churn = predictions)
 
-# Binarize predictions using a threshold of 0.5
-test_df <- test_df %>%
+# If a prediction has a probability greater than 0.5 we will assign it to 1, otherwise 0. 
+test_df <- test_df |>
   mutate(predicted_Churn_binary = if_else(predicted_Churn > 0.5, 1, 0))
-
-# Confusion Matrix
-conf_matrix <- confusionMatrix(as.factor(test_df$predicted_Churn_binary), as.factor(test_df$Churn))
-print(conf_matrix)
-
-# F1 Score
-f1_score <- F1_Score(test_df$Churn, test_df$predicted_Churn_binary)
-print(paste("F1 Score:", f1_score))
-
-# AUC
-roc_obj <- roc(test_df$Churn, test_df$predicted_Churn)
-auc_value <- auc(roc_obj)
-print(paste("AUC:", auc_value))
 ```
+
+### Evaluating Predictions
+
+```{r}
+# Confusion Matrix
+TP <- sum(test_df$predicted_Churn_binary == 1 & test_df$Churn == 1)
+FP <- sum(test_df$predicted_Churn_binary == 1 & test_df$Churn == 0)
+TN <- sum(test_df$predicted_Churn_binary == 0 & test_df$Churn == 0)
+FN <- sum(test_df$predicted_Churn_binary == 0 & test_df$Churn == 1)
+
+print(paste("True Positives (TP):", TP))
+print(paste("False Positives (FP):", FP))
+print(paste("True Negatives (TN):", TN))
+print(paste("False Negatives (FN):", FN))
+
+# Calculate Precision, Recall, and F1 Score
+precision <- TP / (TP + FP)
+recall <- TP / (TP + FN)
+f1_score <- 2 * ((precision * recall) / (precision + recall))
+
+# Print Precision, Recall, and F1 Score
+print(paste("Precision:", precision))
+print(paste("Recall:", recall))
+print(paste("F1 Score:", f1_score))
+```
+
+### Results
+
+We aimed to predict Churn using a telecom dataset using a Logistic Regression model. This was a binary classification where we attempted to train a model to understand the relationships between 20 possible variables and churn to effectively predict churn.
+
+A subset selection was done in order to identify which variables had the most predictive power and which ones could be removed from the available predictors. Our model that having an international plan was the most significant predictor that indicated a customer will churn(having the highest positive coefficient), while having a voicemail plan was the most significant predictors that indicated a customer will not churn (having the highest negative coefficient). 
+
+The best logistic regression model produced was evaluated against the test set and resulted in an F1-Score of 0.359, which is sub-optimal and perhaps not yet ready for any effective use. However, we did learn that perhaps marketing and including voicemail plans could perhaps lead to a lower churn rate. 
 

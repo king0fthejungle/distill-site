@@ -88,29 +88,29 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 
 
   <!--radix_placeholder_meta_tags-->
-  <title>Brady Falor's Porfolio: About this site</title>
+  <title>Brady Falor's Porfolio: Learning Objective Reflections</title>
 
-  <meta property="description" itemprop="description" content="Some additional details about the website"/>
+  <meta property="description" itemprop="description" content="Links to demonstrations and reflections"/>
 
 
 
   <!--  https://developers.facebook.com/docs/sharing/webmasters#markup -->
-  <meta property="og:title" content="Brady Falor&#39;s Porfolio: About this site"/>
+  <meta property="og:title" content="Brady Falor&#39;s Porfolio: Learning Objective Reflections"/>
   <meta property="og:type" content="article"/>
-  <meta property="og:description" content="Some additional details about the website"/>
+  <meta property="og:description" content="Links to demonstrations and reflections"/>
   <meta property="og:locale" content="en_US"/>
   <meta property="og:site_name" content="Brady Falor&#39;s Porfolio"/>
 
   <!--  https://dev.twitter.com/cards/types/summary -->
   <meta property="twitter:card" content="summary"/>
-  <meta property="twitter:title" content="Brady Falor&#39;s Porfolio: About this site"/>
-  <meta property="twitter:description" content="Some additional details about the website"/>
+  <meta property="twitter:title" content="Brady Falor&#39;s Porfolio: Learning Objective Reflections"/>
+  <meta property="twitter:description" content="Links to demonstrations and reflections"/>
 
   <!--/radix_placeholder_meta_tags-->
   <!--radix_placeholder_rmarkdown_metadata-->
 
   <script type="text/json" id="radix-rmarkdown-metadata">
-  {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","description"]}},"value":[{"type":"character","attributes":{},"value":["About this site"]},{"type":"character","attributes":{},"value":["Some additional details about the website"]}]}
+  {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","description"]}},"value":[{"type":"character","attributes":{},"value":["Learning Objective Reflections"]},{"type":"character","attributes":{},"value":["Links to demonstrations and reflections"]}]}
   </script>
   <!--/radix_placeholder_rmarkdown_metadata-->
   <!--radix_placeholder_navigation_in_header-->
@@ -2119,7 +2119,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <!--radix_placeholder_front_matter-->
 
 <script id="distill-front-matter" type="text/json">
-{"title":"About this site","description":"Some additional details about the website","authors":[]}
+{"title":"Learning Objective Reflections","description":"Links to demonstrations and reflections","authors":[]}
 </script>
 
 <!--/radix_placeholder_front_matter-->
@@ -2144,15 +2144,27 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <!--/radix_placeholder_site_before_body-->
 
 <div class="d-title">
-<h1>About this site</h1>
+<h1>Learning Objective Reflections</h1>
 
 <!--radix_placeholder_categories-->
 <!--/radix_placeholder_categories-->
-<p><p>Some additional details about the website</p></p>
+<p><p>Links to demonstrations and reflections</p></p>
 </div>
 
 
 <div class="d-article">
+<h1 id="objective-1-describe-probability-as-a-foundation-of-statistical-modeling-including-inference-and-maximum-likelihood-estimation">Objective 1: Describe probability as a foundation of statistical modeling, including inference and maximum likelihood estimation</h1>
+<p>Within the Statistical Learning tab you will find a page that explains probability using the idea of a coin flip, explains probability distribution using the simulation of dice rolls, makes an inference for a task using a confidence intervals, and lastly shares how we can use the concept of maximum likelihood estimation to make a prediction. First, a primer on probability is given which effectively clears the audience’s palette to make way for the secure foundation for statistical modeling. Second the central limit theorem is explained via a simulation of many dice rolls to lay the cement for the foundation. Finally, the cement hardens by including the concepts of inference and maximum likelihood estimation. As a result this objective is sufficiently met.</p>
+<h1 id="objective-2-determine-and-apply-the-appropriate-generalized-linear-model-for-a-specific-data-context">Objective 2: Determine and apply the appropriate generalized linear model for a specific data context</h1>
+<p>Within the Logistic Regression tab there is a section titled “Applying the appropriate generalized linear model” where a problem is identified and the appropriate generalized linear model is applied for the specific data given. The first section explores a data solution to the common problem of customer churn. It identifies that the outcome we’d like to learn is of a binary nature, and thus logistic regression the appropriate generalized linear model (GLM) to use. Should the problem have been to predict a customer’s count of calls made in a time-frame then a Poisson regression model would be appropriate, or if the problem was to predict the income of each customer based on their habits than a multiple linear regression model would be appropriate. However since the data was in the context of making a binary prediction of Churn = True or Churn = False, the logistic regression model is appropriate. Once the correct GLM was identified it was then explained given the statistical data context.</p>
+<h1 id="objective-3-conduct-model-selection-for-a-set-of-candidate-models">Objective 3: Conduct model selection for a set of candidate models</h1>
+<p>Within the Logistic Regression tab there is a section titled “Conduct Model Selection from a set of candidate models” where subset selection is performed to improve upon a logistic regression model. Within this section an appropriate model selection technique for the given data was chosen, it was determined that best subset selection was not appropriate given that the number of predictors was large it would not be computationally efficient to perform best-subset selection. Instead, backward selection was used to remove predictors that had a negligible influence on the customer churn, in order to create a more potent and efficient data set for the logistic regression model to learn from. From our backward selection I obtained 50 different models with different possible subsets of predictors for a LINEAR regression problem, of these 50 different models I used the subsets to generate a list of 50 different LOGISITIC regression models to fit the data context, and of these 50 models the model with the lowest AIC value was selected.</p>
+<h1 id="objective-4-communicate-the-results-of-statistical-models-to-a-general-audience">Objective 4: Communicate the results of statistical models to a general audience</h1>
+<p>Within the Logistic Regression tab there is a section titled “Communicating Results to a general audience” where the best model is evaluated against the test split, cross validated, and a summary of the model results is shared. First cross validation is performed to ensure that our model performs similarly across different folds of the training set. Secondly, I ensure that the test data is processed in the same manner the training data was (one-hot encoding), and that the correct subset selection was made from the test_set before evaluating the model with it. When evaluating I chose appropriate metrics to understand how well our model was performing; recall, precision, and F1 score. I then summarized the various results in a manner with which someone without statistical training could understand, share the predictors that had the coefficients of great magnitude and interpreted whether or not the current model should be used, thus I appropriately met the objective of communicating the results of a statistical model to a general audience.</p>
+<h1 id="objective-5-use-programming-software-i.e.-r-to-fit-and-assess-statistical-models">Objective 5: Use programming software (i.e., R) to fit and assess statistical models</h1>
+<p>The entirety of the Logistic regression section demonstrates this learning objective. Within this page a logistic regression model is fit to a dataset of 20 predictors to classify a record as Churn or not Churn. The model is then assessed to be generalizable by performing 10-fold Cross Validation against the training split. Then the model is further assessed by by performing prediction using the test set, and calculating various metrics. All of this was done using the software R in Posit Cloud, knitting and rendering a distill website to display this information, and deploying it to GitHub pages. As a result, the objective to use R to fit and assess statistical models is appropriately met.</p>
+<h1 id="participation-in-course-community">Participation in Course Community</h1>
+<p>I attended all classes with my full attention, and gave my best effort to build a clear understanding of statistical modeling. When a general question was posed to the audience by the professor I was often one of the few students who responded with an idea or answer. I will concede that given the course was online, and I was participating in a full-time internship throughout the full duration of the course, that my goals of connecting with my classmates were not quite achieved. However, I did manage to reach out to some classmates and attempt to answer some questions I received about where to find specific directions needed for some assignments, and I did connect with a few classmates on Linkedin. I wasn’t able to keep pace with the Data Feminism book asynchronous discussions as the semester paced on, but I did pace with some and I have been reading Data Feminism and hope to complete it soon. During class periods where breakout working sessions were formed I did take it upon myself to lead the group in which I was placed and encouraged my fellow group members to contribute to the conversation. For an online course, i do feel that while my ideal contributions were not met, I still made significant contribution towards the general success of the class and my individual learning.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->

@@ -2133,7 +2133,8 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <a href="index.html">Home</a>
 <a href="about.html">About</a>
 <a href="statlearn.html">Statistical Learning</a>
-<a href="logistic.html">Logistic Regression</a>
+<a href="logistic.html">Predicting Churn with Logistic Regression</a>
+<a href="STA631Reflection.html">STA 631</a>
 <a href="javascript:void(0);" class="nav-toggle">&#9776;</a>
 </div>
 </nav>
@@ -2152,10 +2153,36 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 
 
 <div class="d-article">
+<h1 id="introduction">Introduction:</h1>
+<p>This website is built using distill and R, and as you progress you will notice bit of R code that help me to fit and assess statistical models to solve the overall problem.</p>
+<p>Churn is the rate at which clients or customers stop doing business with a company over time. A common problem in data science is to predict churn.</p>
+<p>There are two states a customer can be in, if they are still doing business they have not churned (Churn = FALSE or 0), if they are no longer doing business then they have churned (Churn = TRUE or 1).</p>
+<h1 id="applying-the-appropriate-generalized-linear-model">Applying the appropriate generalized linear model</h1>
+<p>Given we have a data set that includes other characteristics (independent variables, X) about each customer and whether or not they have churned, we can model this relationship using logistic regression as so:</p>
+<p>The logistic regression model predicts the probability <span class="math inline">\(P(Y=1)\)</span> of the dependent variable <span class="math inline">\(Churn\)</span> being 1 (or True), given the independent variables <span class="math inline">\(X_1, X_2, \ldots, X_n\)</span>. The equation is:</p>
+<p><span class="math display">\[
+P(Churn=1|X) = \frac{1}{1 + e^{-(\beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_n X_n)}}
+\]</span></p>
+<p>Where:
+- <span class="math inline">\(P(Y=1|X)\)</span> is the probability of <span class="math inline">\(Y\)</span> being 1 given <span class="math inline">\(X\)</span>.
+- <span class="math inline">\(\beta_0\)</span> is the intercept.
+- <span class="math inline">\(\beta_1, \beta_2, \ldots, \beta_n\)</span> are the coefficients of the independent variables <span class="math inline">\(X_1, X_2, \ldots, X_n\)</span>.
+- <span class="math inline">\(e\)</span> is the base of the natural logarithm.</p>
+<p>The logistic function (also called the sigmoid function) is used to map the predicted values to probabilities.</p>
+<p><span class="math display">\[
+P(Churn=1|X) = \sigma(\beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_n X_n)
+\]</span></p>
+<p>Where <span class="math inline">\(\sigma(z)\)</span> is the sigmoid function defined as:</p>
+<p><span class="math display">\[
+\sigma(z) = \frac{1}{1 + e^{-z}}
+\]</span></p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://tidyverse.tidyverse.org'>tidyverse</a></span><span class='op'>)</span></span>
-<span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://tidymodels.tidymodels.org'>tidymodels</a></span><span class='op'>)</span></span></code></pre>
+<span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://tidymodels.tidymodels.org'>tidymodels</a></span><span class='op'>)</span></span>
+<span></span>
+<span><span class='co'># Model evaluation</span></span>
+<span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://dplyr.tidyverse.org'>dplyr</a></span><span class='op'>)</span></span></code></pre>
 </div>
 </div>
 <div class="layout-chunk" data-layout="l-body">
@@ -2193,37 +2220,64 @@ $ Churn                    [3m[38;5;246m&lt;lgl&gt;[39m[23m FALSE, FALSE, FA
 </div>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'># removing white space from column names</span></span>
+<span><span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span><span class='op'>(</span><span class='va'>train_df</span><span class='op'>)</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/grep.html'>gsub</a></span><span class='op'>(</span><span class='st'>" "</span>, <span class='st'>"_"</span>, <span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span><span class='op'>(</span><span class='va'>train_df</span><span class='op'>)</span><span class='op'>)</span></span>
+<span><span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span><span class='op'>(</span><span class='va'>test_df</span><span class='op'>)</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/grep.html'>gsub</a></span><span class='op'>(</span><span class='st'>" "</span>, <span class='st'>"_"</span>, <span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span><span class='op'>(</span><span class='va'>test_df</span><span class='op'>)</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='co'># Print modified column names</span></span>
+<span><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/colnames.html'>colnames</a></span><span class='op'>(</span><span class='va'>train_df</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
+</div>
+<pre><code> [1] &quot;State&quot;                  &quot;Account_length&quot;        
+ [3] &quot;Area_code&quot;              &quot;International_plan&quot;    
+ [5] &quot;Voice_mail_plan&quot;        &quot;Number_vmail_messages&quot; 
+ [7] &quot;Total_day_minutes&quot;      &quot;Total_day_calls&quot;       
+ [9] &quot;Total_day_charge&quot;       &quot;Total_eve_minutes&quot;     
+[11] &quot;Total_eve_calls&quot;        &quot;Total_eve_charge&quot;      
+[13] &quot;Total_night_minutes&quot;    &quot;Total_night_calls&quot;     
+[15] &quot;Total_night_charge&quot;     &quot;Total_intl_minutes&quot;    
+[17] &quot;Total_intl_calls&quot;       &quot;Total_intl_charge&quot;     
+[19] &quot;Customer_service_calls&quot; &quot;Churn&quot;                 </code></pre>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='va'>train_df</span><span class='op'>$</span><span class='va'>Churn</span><span class='op'>)</span></span></code></pre>
+</div>
+<pre><code>
+FALSE  TRUE 
+ 2278   388 </code></pre>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://github.com/njtierney/naniar'>naniar</a></span><span class='op'>)</span></span>
 <span></span>
 <span><span class='fu'><a href='https://docs.ropensci.org/visdat/reference/vis_miss.html'>vis_miss</a></span><span class='op'>(</span><span class='va'>train_df</span><span class='op'>)</span></span></code></pre>
 </div>
-<p><img src="logistic_files/figure-html5/unnamed-chunk-4-1.png" width="624" /></p>
+<p><img src="logistic_files/figure-html5/unnamed-chunk-6-1.png" width="624" /></p>
 </div>
 <p>There is no missing data! Excellent.</p>
-<p>Now lets do preprocessing</p>
+<h1 id="conduct-model-selection-from-a-set-of-candidate-models">Conduct Model Selection from a set of candidate models</h1>
+<p>The goal of this section is to perform subset selection where we identify a subset of predictors that are related to the response variable.</p>
+<p>First lets perform preprocessing, lets use a recipe to one-hot encode our variables:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>train_df</span> <span class='op'>&lt;-</span> <span class='va'>train_df</span> <span class='op'>|&gt;</span></span>
 <span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span>Churn <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/if_else.html'>if_else</a></span><span class='op'>(</span><span class='va'>Churn</span>, <span class='fl'>1</span>, <span class='fl'>0</span><span class='op'>)</span><span class='op'>)</span></span>
 <span></span>
-<span><span class='co'># Create the recipe</span></span>
-<span><span class='va'>rec</span> <span class='op'>&lt;-</span> <span class='fu'>recipe</span><span class='op'>(</span><span class='va'>Churn</span> <span class='op'>~</span> <span class='va'>.</span>, data <span class='op'>=</span> <span class='va'>train_df</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
-<span>  <span class='fu'>step_dummy</span><span class='op'>(</span><span class='fu'>all_nominal_predictors</span><span class='op'>(</span><span class='op'>)</span>, one_hot <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span> <span class='co'># Dummy encode categorical variables</span></span>
-<span>  <span class='fu'>step_normalize</span><span class='op'>(</span><span class='fu'>all_numeric_predictors</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span>              <span class='co'># Standardize continuous variables</span></span>
-<span>  <span class='fu'>step_corr</span><span class='op'>(</span><span class='fu'>all_numeric_predictors</span><span class='op'>(</span><span class='op'>)</span>, threshold <span class='op'>=</span> <span class='fl'>0.9</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span>  <span class='co'># Remove highly correlated variables</span></span>
-<span>  <span class='fu'>step_log</span><span class='op'>(</span><span class='fu'>all_outcomes</span><span class='op'>(</span><span class='op'>)</span>, offset <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span>                  <span class='co'># Log transform skewed distributions</span></span>
+<span></span>
+<span><span class='va'>rec</span> <span class='op'>&lt;-</span> <span class='fu'>recipe</span><span class='op'>(</span><span class='va'>Churn</span> <span class='op'>~</span> <span class='va'>.</span>, data <span class='op'>=</span> <span class='va'>train_df</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'>step_dummy</span><span class='op'>(</span><span class='fu'>all_nominal_predictors</span><span class='op'>(</span><span class='op'>)</span>, one_hot <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>|&gt;</span> <span class='co'># Dummy encode categorical variables</span></span>
 <span>  <span class='fu'>prep</span><span class='op'>(</span><span class='op'>)</span></span>
 <span></span>
 <span><span class='co'># Apply the recipe to the data</span></span>
 <span><span class='va'>train_processed</span> <span class='op'>&lt;-</span> <span class='fu'>bake</span><span class='op'>(</span><span class='va'>rec</span>, new_data <span class='op'>=</span> <span class='va'>train_df</span><span class='op'>)</span></span></code></pre>
 </div>
 </div>
+<h3 id="training-a-model">Training a Model</h3>
+<p>Now lets train a model with everything to see how it performs:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'># Create the logistic regression model using glm</span></span>
 <span><span class='va'>model</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/glm.html'>glm</a></span><span class='op'>(</span><span class='va'>Churn</span> <span class='op'>~</span> <span class='va'>.</span>, data <span class='op'>=</span> <span class='va'>train_processed</span>, family <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/family.html'>binomial</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span></span>
-<span></span>
-<span><span class='co'># View the model summary</span></span>
 <span><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>model</span><span class='op'>)</span></span></code></pre>
 </div>
 <pre><code>
@@ -2232,156 +2286,284 @@ glm(formula = Churn ~ ., family = binomial(), data = train_processed)
 
 Coefficients:
                          Estimate Std. Error z value Pr(&gt;|z|)    
-(Intercept)              -2.79382    0.09792 -28.533  &lt; 2e-16 ***
-`Account length`          0.05143    0.07201   0.714 0.475113    
-`Area code`              -0.01334    0.07213  -0.185 0.853222    
-`Number vmail messages`  -0.32444    0.08345  -3.888 0.000101 ***
-`Total day minutes`       0.62067    0.07492   8.284  &lt; 2e-16 ***
-`Total day calls`         0.05901    0.07185   0.821 0.411503    
-`Total eve minutes`       0.25680    0.07419   3.461 0.000538 ***
-`Total eve calls`        -0.02855    0.07227  -0.395 0.692789    
-`Total night calls`       0.02362    0.07088   0.333 0.738922    
-`Total night charge`      0.12808    0.07307   1.753 0.079617 .  
-`Total intl minutes`      0.22891    0.07387   3.099 0.001942 ** 
-`Total intl calls`       -0.25836    0.08145  -3.172 0.001514 ** 
-`Customer service calls`  0.61391    0.06559   9.359  &lt; 2e-16 ***
-State_AL                  0.03464    0.13982   0.248 0.804338    
-State_AR                  0.10675    0.11395   0.937 0.348877    
-State_AZ                  0.02390    0.13575   0.176 0.860235    
-State_CA                  0.11050    0.09280   1.191 0.233761    
-State_CO                  0.04665    0.13300   0.351 0.725801    
-State_CT                  0.16082    0.12536   1.283 0.199531    
-State_DC                  0.09819    0.12152   0.808 0.419087    
-State_DE                  0.09319    0.12077   0.772 0.440356    
-State_FL                  0.07177    0.12706   0.565 0.572184    
-State_GA                  0.08713    0.11994   0.726 0.467582    
-State_HI                 -0.07262    0.14729  -0.493 0.621973    
-State_IA                  0.04205    0.12452   0.338 0.735565    
-State_ID                  0.03973    0.13584   0.292 0.769926    
-State_IL                 -0.03203    0.12940  -0.248 0.804520    
-State_IN                  0.04210    0.12961   0.325 0.745319    
-State_KS                  0.11752    0.12000   0.979 0.327403    
-State_KY                  0.07228    0.11690   0.618 0.536351    
-State_LA                  0.06086    0.11908   0.511 0.609322    
-State_MA                  0.13325    0.12277   1.085 0.277774    
-State_MD                  0.13078    0.12529   1.044 0.296574    
-State_ME                  0.16986    0.11592   1.465 0.142845    
-State_MI                  0.17145    0.12303   1.394 0.163440    
-State_MN                  0.16932    0.13519   1.252 0.210400    
-State_MO                  0.05660    0.12958   0.437 0.662250    
-State_MS                  0.17509    0.11466   1.527 0.126757    
-State_MT                  0.20567    0.12004   1.713 0.086639 .  
-State_NC                  0.04264    0.12937   0.330 0.741671    
-State_ND                  0.01748    0.12630   0.138 0.889904    
-State_NE                  0.04835    0.12622   0.383 0.701691    
-State_NH                  0.14275    0.11270   1.267 0.205302    
-State_NJ                  0.17551    0.11457   1.532 0.125552    
-State_NM                  0.04242    0.12620   0.336 0.736801    
-State_NV                  0.15049    0.12598   1.195 0.232268    
-State_NY                  0.16014    0.13367   1.198 0.230898    
-State_OH                  0.11081    0.13458   0.823 0.410279    
-State_OK                  0.07676    0.12483   0.615 0.538608    
-State_OR                  0.05995    0.13582   0.441 0.658956    
-State_PA                  0.12743    0.10454   1.219 0.222878    
-State_RI                 -0.10291    0.14260  -0.722 0.470512    
-State_SC                  0.21395    0.11590   1.846 0.064893 .  
-State_SD                  0.06568    0.12332   0.533 0.594301    
-State_TN                  0.04846    0.11776   0.412 0.680667    
-State_TX                  0.23390    0.11788   1.984 0.047235 *  
-State_UT                  0.13374    0.13117   1.020 0.307928    
-State_VA                 -0.08710    0.15609  -0.558 0.576823    
-State_VT                 -0.01623    0.13621  -0.119 0.905135    
-State_WA                  0.16353    0.11569   1.414 0.157507    
-State_WI                 -0.01535    0.14819  -0.104 0.917483    
-State_WV                  0.04319    0.15935   0.271 0.786345    
-State_WY                  0.04128    0.13784   0.300 0.764556    
-`International plan_Yes`  0.57499    0.05343  10.762  &lt; 2e-16 ***
+(Intercept)            -8.920e+00  1.260e+00  -7.079 1.45e-12 ***
+Account_length          1.482e-03  1.630e-03   0.909  0.36343    
+Area_code              -3.446e-04  1.532e-03  -0.225  0.82202    
+Number_vmail_messages   4.076e-02  2.143e-02   1.902  0.05721 .  
+Total_day_minutes      -3.491e-01  3.826e+00  -0.091  0.92729    
+Total_day_calls         3.608e-03  3.246e-03   1.111  0.26643    
+Total_day_charge        2.132e+00  2.251e+01   0.095  0.92455    
+Total_eve_minutes       1.419e+00  1.921e+00   0.738  0.46029    
+Total_eve_calls        -1.615e-03  3.220e-03  -0.501  0.61609    
+Total_eve_charge       -1.662e+01  2.260e+01  -0.735  0.46223    
+Total_night_minutes     4.749e-04  1.023e+00   0.000  0.99963    
+Total_night_calls       1.735e-03  3.294e-03   0.527  0.59839    
+Total_night_charge      5.718e-02  2.272e+01   0.003  0.99799    
+Total_intl_minutes     -2.985e+00  6.178e+00  -0.483  0.62895    
+Total_intl_calls       -1.228e-01  3.005e-02  -4.086 4.38e-05 ***
+Total_intl_charge       1.141e+01  2.288e+01   0.499  0.61795    
+Customer_service_calls  5.463e-01  4.662e-02  11.718  &lt; 2e-16 ***
+State_AL                2.075e-01  7.925e-01   0.262  0.79346    
+State_AR                8.758e-01  7.711e-01   1.136  0.25607    
+State_AZ                1.406e-01  9.246e-01   0.152  0.87916    
+State_CA                1.309e+00  8.860e-01   1.477  0.13969    
+State_CO                3.176e-01  7.994e-01   0.397  0.69114    
+State_CT                1.150e+00  7.500e-01   1.533  0.12524    
+State_DC                7.592e-01  8.254e-01   0.920  0.35770    
+State_DE                6.462e-01  7.753e-01   0.833  0.40463    
+State_FL                5.189e-01  7.931e-01   0.654  0.51291    
+State_GA                7.058e-01  7.902e-01   0.893  0.37175    
+State_HI               -7.328e-01  1.002e+00  -0.731  0.46457    
+State_IA                3.493e-01  9.146e-01   0.382  0.70252    
+State_ID                3.175e-01  8.344e-01   0.381  0.70355    
+State_IL               -4.100e-01  8.949e-01  -0.458  0.64683    
+State_IN                2.688e-01  8.043e-01   0.334  0.73824    
+State_KS                9.024e-01  7.661e-01   1.178  0.23883    
+State_KY                5.636e-01  8.182e-01   0.689  0.49096    
+State_LA                5.682e-01  9.068e-01   0.627  0.53091    
+State_MA                1.069e+00  7.853e-01   1.361  0.17346    
+State_MD                9.575e-01  7.461e-01   1.283  0.19937    
+State_ME                1.375e+00  7.587e-01   1.813  0.06987 .  
+State_MI                1.285e+00  7.462e-01   1.722  0.08506 .  
+State_MN                1.175e+00  7.426e-01   1.583  0.11353    
+State_MO                3.961e-01  8.306e-01   0.477  0.63344    
+State_MS                1.505e+00  7.654e-01   1.967  0.04920 *  
+State_MT                1.645e+00  7.562e-01   2.176  0.02957 *  
+State_NC                2.904e-01  7.996e-01   0.363  0.71650    
+State_ND                2.940e-03  8.741e-01   0.003  0.99732    
+State_NE                2.949e-01  8.536e-01   0.345  0.72973    
+State_NH                1.305e+00  7.888e-01   1.654  0.09811 .  
+State_NJ                1.398e+00  7.471e-01   1.871  0.06134 .  
+State_NM                3.212e-01  8.655e-01   0.371  0.71052    
+State_NV                1.040e+00  7.450e-01   1.395  0.16289    
+State_NY                1.111e+00  7.467e-01   1.488  0.13671    
+State_OH                7.216e-01  7.650e-01   0.943  0.34559    
+State_OK                5.418e-01  7.982e-01   0.679  0.49728    
+State_OR                3.802e-01  7.912e-01   0.481  0.63080    
+State_PA                1.244e+00  8.055e-01   1.544  0.12260    
+State_RI               -9.942e-01  9.569e-01  -1.039  0.29882    
+State_SC                1.726e+00  7.675e-01   2.249  0.02451 *  
+State_SD                4.039e-01  8.078e-01   0.500  0.61703    
+State_TN                3.497e-01  8.477e-01   0.412  0.67998    
+State_TX                1.809e+00  7.353e-01   2.461  0.01386 *  
+State_UT                9.522e-01  7.754e-01   1.228  0.21945    
+State_VA               -6.646e-01  8.765e-01  -0.758  0.44833    
+State_VT               -2.364e-01  8.448e-01  -0.280  0.77962    
+State_WA                1.326e+00  7.692e-01   1.724  0.08473 .  
+State_WI               -1.862e-01  8.740e-01  -0.213  0.83128    
+State_WV                2.495e-01  7.771e-01   0.321  0.74819    
+State_WY                2.085e-01  7.812e-01   0.267  0.78952    
+International_plan_Yes  2.278e+00  1.704e-01  13.373  &lt; 2e-16 ***
+Voice_mail_plan_Yes    -2.159e+00  6.811e-01  -3.170  0.00152 ** 
 ---
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 
 (Dispersion parameter for binomial family taken to be 1)
 
-    Null deviance: 1265.16  on 2665  degrees of freedom
-Residual deviance:  915.93  on 2602  degrees of freedom
-AIC: 1853.3
+    Null deviance: 2212.2  on 2665  degrees of freedom
+Residual deviance: 1641.2  on 2597  degrees of freedom
+AIC: 1779.2
 
 Number of Fisher Scoring iterations: 6</code></pre>
 </div>
+<h3 id="subset-selection">Subset Selection</h3>
+<p>Our model has an AIC of 1779.2, lets now see if we can improve it with a subset selection algorithm:</p>
+<p>Although we have a binary classification problem where we would like to perform logisitic regression, we can still use regsubsets from the leaps package to help use understand what subsets would work best for linear regression models.</p>
+<p>Because we have p = 20 predictors, exhaustive best subset selection is not reasonable.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>test_df</span> <span class='op'>&lt;-</span> <span class='va'>test_df</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>leaps</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='va'>regfit</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/leaps/man/regsubsets.html'>regsubsets</a></span><span class='op'>(</span><span class='va'>Churn</span> <span class='op'>~</span> <span class='va'>.</span>, data <span class='op'>=</span> <span class='va'>train_processed</span>, nvmax <span class='op'>=</span> <span class='fl'>50</span>, method <span class='op'>=</span> <span class='st'>"backward"</span><span class='op'>)</span></span>
+<span><span class='va'>summary_reg_fit</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>regfit</span><span class='op'>)</span></span></code></pre>
+</div>
+</div>
+<p>Now that we have our 50 candidate models, lets train logistic regression models on each subset that regsubsets built for us using linear regression models, and select the model that results in the lowest AIC value.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>best_models</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/as.data.frame.html'>as.data.frame</a></span><span class='op'>(</span><span class='va'>summary_reg_fit</span><span class='op'>$</span><span class='va'>which</span><span class='op'>)</span></span>
+<span><span class='va'>best_models</span> <span class='op'>&lt;-</span> <span class='va'>best_models</span><span class='op'>[</span>, <span class='op'>-</span><span class='fl'>1</span><span class='op'>]</span></span>
+<span></span>
+<span><span class='co'># Init Empty AIC Vector</span></span>
+<span><span class='va'>aic_values</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/numeric.html'>numeric</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span><span class='op'>(</span><span class='va'>best_models</span><span class='op'>)</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='kw'>for</span> <span class='op'>(</span><span class='va'>i</span> <span class='kw'>in</span> <span class='fl'>1</span><span class='op'>:</span><span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span><span class='op'>(</span><span class='va'>best_models</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>{</span></span>
+<span>  <span class='va'>current_model</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/logical.html'>as.logical</a></span><span class='op'>(</span><span class='va'>best_models</span><span class='op'>[</span><span class='va'>i</span>, <span class='op'>]</span><span class='op'>)</span> <span class='co'># Gives us a binary vector</span></span>
+<span></span>
+<span>  <span class='va'>selected_predictors</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span><span class='op'>(</span><span class='va'>best_models</span><span class='op'>)</span><span class='op'>[</span><span class='va'>current_model</span><span class='op'>]</span>  <span class='co'># Only select the columns from the candidate model</span></span>
+<span>  </span>
+<span>  <span class='co'># Train the logistic regression model</span></span>
+<span>  <span class='va'>formula</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/formula.html'>as.formula</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='st'>"Churn ~"</span>, <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='va'>selected_predictors</span>, collapse <span class='op'>=</span> <span class='st'>" + "</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span></span>
+<span>  <span class='va'>fit</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/glm.html'>glm</a></span><span class='op'>(</span><span class='va'>formula</span>, data <span class='op'>=</span> <span class='va'>train_processed</span>, family <span class='op'>=</span> <span class='va'>binomial</span><span class='op'>)</span></span>
+<span>  </span>
+<span>  <span class='co'># store the AIC of the model</span></span>
+<span>  <span class='va'>aic_values</span><span class='op'>[</span><span class='va'>i</span><span class='op'>]</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/AIC.html'>AIC</a></span><span class='op'>(</span><span class='va'>fit</span><span class='op'>)</span></span>
+<span><span class='op'>}</span></span>
+<span></span>
+<span><span class='co'># select the model with the lowest AIC</span></span>
+<span><span class='va'>best_model_index</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/which.min.html'>which.min</a></span><span class='op'>(</span><span class='va'>aic_values</span><span class='op'>)</span></span>
+<span><span class='va'>best_model</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/logical.html'>as.logical</a></span><span class='op'>(</span><span class='va'>best_models</span><span class='op'>[</span><span class='va'>best_model_index</span>, <span class='op'>]</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='co'># Re-train a logisitc regression model using the best subset </span></span>
+<span><span class='va'>selected_best_predictors</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span><span class='op'>(</span><span class='va'>best_models</span><span class='op'>)</span><span class='op'>[</span><span class='va'>best_model</span><span class='op'>]</span></span>
+<span><span class='va'>best_formula</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/formula.html'>as.formula</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='st'>"Churn ~"</span>, <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='va'>selected_best_predictors</span>, collapse <span class='op'>=</span> <span class='st'>" + "</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span></span>
+<span><span class='va'>best_fit</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/glm.html'>glm</a></span><span class='op'>(</span><span class='va'>best_formula</span>, data <span class='op'>=</span> <span class='va'>train_processed</span>, family <span class='op'>=</span> <span class='va'>binomial</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>best_fit</span><span class='op'>)</span></span></code></pre>
+</div>
+<pre><code>
+Call:
+glm(formula = best_formula, family = binomial, data = train_processed)
+
+Coefficients:
+                        Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)            -8.684033   0.697692 -12.447  &lt; 2e-16 ***
+Account_length          0.001368   0.001613   0.848 0.396437    
+Number_vmail_messages   0.038958   0.021095   1.847 0.064781 .  
+Total_day_calls         0.003490   0.003191   1.094 0.274041    
+Total_day_charge        0.077284   0.007382  10.469  &lt; 2e-16 ***
+Total_eve_minutes       0.006082   0.001305   4.659 3.18e-06 ***
+Total_night_charge      0.069230   0.028505   2.429 0.015153 *  
+Total_intl_calls       -0.121521   0.029635  -4.101 4.12e-05 ***
+Total_intl_charge       0.359486   0.087630   4.102 4.09e-05 ***
+Customer_service_calls  0.544496   0.046068  11.819  &lt; 2e-16 ***
+State_AR                0.533597   0.425092   1.255 0.209388    
+State_CA                0.984126   0.600453   1.639 0.101219    
+State_CT                0.820130   0.384905   2.131 0.033111 *  
+State_HI               -1.042918   0.765884  -1.362 0.173287    
+State_KS                0.575603   0.414311   1.389 0.164740    
+State_MA                0.735973   0.446823   1.647 0.099532 .  
+State_MD                0.610034   0.378263   1.613 0.106804    
+State_ME                1.019690   0.397382   2.566 0.010287 *  
+State_MI                0.949521   0.377625   2.514 0.011922 *  
+State_MN                0.827351   0.370660   2.232 0.025608 *  
+State_MS                1.150270   0.413325   2.783 0.005386 ** 
+State_MT                1.296031   0.397695   3.259 0.001119 ** 
+State_NH                0.972391   0.453971   2.142 0.032196 *  
+State_NJ                1.070657   0.376960   2.840 0.004508 ** 
+State_NV                0.721948   0.375428   1.923 0.054480 .  
+State_NY                0.774550   0.378783   2.045 0.040871 *  
+State_PA                0.920228   0.484791   1.898 0.057671 .  
+State_RI               -1.297771   0.701948  -1.849 0.064485 .  
+State_SC                1.407910   0.413761   3.403 0.000667 ***
+State_TX                1.465708   0.354614   4.133 3.58e-05 ***
+State_UT                0.603891   0.433081   1.394 0.163195    
+State_VA               -1.028869   0.594978  -1.729 0.083763 .  
+State_WA                1.007015   0.422293   2.385 0.017096 *  
+International_plan_Yes  2.233803   0.166218  13.439  &lt; 2e-16 ***
+Voice_mail_plan_Yes    -2.079661   0.669528  -3.106 0.001895 ** 
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 2212.2  on 2665  degrees of freedom
+Residual deviance: 1650.8  on 2631  degrees of freedom
+AIC: 1720.8
+
+Number of Fisher Scoring iterations: 6</code></pre>
+</div>
+<p>With a simple subset selection we were able to reduce the AIC from 1779.2 to 1725.7, indicating that our model selection helped us to find a better model along with reducing the data needed to make predictions.</p>
+<h1 id="communicating-results-to-a-general-audience">Communicating Results to a general audience</h1>
+<h3 id="cross-validation">Cross Validation</h3>
+<p>Lets now do K-Fold cross validation, in this case K=10. :</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>boot</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='va'>cv_error</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fl'>0</span>,<span class='fl'>10</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='kw'>for</span> <span class='op'>(</span><span class='va'>i</span> <span class='kw'>in</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>10</span><span class='op'>)</span><span class='op'>{</span></span>
+<span>  <span class='va'>logistic_model</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/glm.html'>glm</a></span><span class='op'>(</span><span class='va'>best_formula</span>, data <span class='op'>=</span> <span class='va'>train_processed</span>, family <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/family.html'>binomial</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span></span>
+<span>  <span class='va'>cv_error</span><span class='op'>[</span><span class='va'>i</span><span class='op'>]</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/boot/man/cv.glm.html'>cv.glm</a></span><span class='op'>(</span><span class='va'>train_processed</span>, <span class='va'>logistic_model</span>, K <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span><span class='op'>$</span><span class='va'>delta</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>]</span></span>
+<span><span class='op'>}</span></span>
+<span></span>
+<span><span class='va'>cv_error</span></span></code></pre>
+</div>
+<pre><code> [1] 0.09794151 0.09826643 0.09834044 0.09804148 0.09797839 0.09823844
+ [7] 0.09798051 0.09887112 0.09841333 0.09778338</code></pre>
+</div>
+<p>Our estimated test errors for each fold are all very close in value, which tells us that this model will generalize should a test set not be available, luckily we have a test set available…</p>
+<h3 id="processing-test">Processing Test</h3>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='va'>test_df</span><span class='op'>$</span><span class='va'>Churn</span><span class='op'>)</span></span></code></pre>
+</div>
+<pre><code>
+FALSE  TRUE 
+  572    95 </code></pre>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>test_df</span> <span class='op'>&lt;-</span> <span class='va'>test_df</span> <span class='op'>|&gt;</span></span>
 <span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span>Churn <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/if_else.html'>if_else</a></span><span class='op'>(</span><span class='va'>Churn</span>, <span class='fl'>1</span>, <span class='fl'>0</span><span class='op'>)</span><span class='op'>)</span></span>
 <span></span>
-<span></span>
-<span><span class='co'># Transform the test data using the same recipe</span></span>
-<span><span class='va'>test_processed</span> <span class='op'>&lt;-</span> <span class='fu'>bake</span><span class='op'>(</span><span class='va'>rec</span>, new_data <span class='op'>=</span> <span class='va'>test_df</span><span class='op'>)</span></span>
-<span></span>
-<span><span class='co'># Make predictions on the test data</span></span>
-<span><span class='co'># Make predictions on the test data (excluding the Churn column)</span></span>
-<span><span class='va'>predictions</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span><span class='op'>(</span><span class='va'>model</span>, newdata <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/select.html'>select</a></span><span class='op'>(</span><span class='va'>test_processed</span>, <span class='op'>-</span><span class='va'>Churn</span><span class='op'>)</span>, type <span class='op'>=</span> <span class='st'>"response"</span><span class='op'>)</span></span>
-<span></span>
-<span><span class='co'># Add predictions and actual Churn back to the test data frame for evaluation</span></span>
-<span><span class='va'>test_df</span> <span class='op'>&lt;-</span> <span class='va'>test_df</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
-<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span>predicted_Churn <span class='op'>=</span> <span class='va'>predictions</span><span class='op'>)</span></span></code></pre>
+<span><span class='va'>test_processed</span> <span class='op'>&lt;-</span> <span class='fu'>bake</span><span class='op'>(</span><span class='va'>rec</span>, new_data <span class='op'>=</span> <span class='va'>test_df</span><span class='op'>)</span></span></code></pre>
 </div>
 </div>
+<p>Making Predictions</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://github.com/topepo/caret/'>caret</a></span><span class='op'>)</span></span>
-<span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://xrobin.github.io/pROC/'>pROC</a></span><span class='op'>)</span></span>
-<span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://github.com/yanyachen/MLmetrics'>MLmetrics</a></span><span class='op'>)</span></span>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'># Make predictions on the test data (excluding the Churn column)</span></span>
+<span><span class='va'>predictions</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span><span class='op'>(</span><span class='va'>best_fit</span>, newdata <span class='op'>=</span> <span class='fu'>dplyr</span><span class='fu'>::</span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/select.html'>select</a></span><span class='op'>(</span><span class='va'>test_processed</span>, <span class='op'>-</span><span class='va'>Churn</span><span class='op'>)</span>, type <span class='op'>=</span> <span class='st'>"response"</span><span class='op'>)</span></span>
 <span></span>
+<span><span class='co'># Add predictions and actual Churn back to the test data frame for evaluation</span></span>
+<span><span class='va'>test_df</span> <span class='op'>&lt;-</span> <span class='va'>test_df</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span>predicted_Churn <span class='op'>=</span> <span class='va'>predictions</span><span class='op'>)</span></span>
 <span></span>
-<span><span class='co'># Binarize predictions using a threshold of 0.5</span></span>
-<span><span class='va'>test_df</span> <span class='op'>&lt;-</span> <span class='va'>test_df</span> <span class='op'><a href='https://magrittr.tidyverse.org/reference/pipe.html'>%&gt;%</a></span></span>
-<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span>predicted_Churn_binary <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/if_else.html'>if_else</a></span><span class='op'>(</span><span class='va'>predicted_Churn</span> <span class='op'>&gt;</span> <span class='fl'>0.5</span>, <span class='fl'>1</span>, <span class='fl'>0</span><span class='op'>)</span><span class='op'>)</span></span>
-<span></span>
-<span><span class='co'># Confusion Matrix</span></span>
-<span><span class='va'>conf_matrix</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/caret/man/confusionMatrix.html'>confusionMatrix</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/factor.html'>as.factor</a></span><span class='op'>(</span><span class='va'>test_df</span><span class='op'>$</span><span class='va'>predicted_Churn_binary</span><span class='op'>)</span>, <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>as.factor</a></span><span class='op'>(</span><span class='va'>test_df</span><span class='op'>$</span><span class='va'>Churn</span><span class='op'>)</span><span class='op'>)</span></span>
-<span><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>conf_matrix</span><span class='op'>)</span></span></code></pre>
+<span><span class='co'># If a prediction has a probability greater than 0.5 we will assign it to 1, otherwise 0. </span></span>
+<span><span class='va'>test_df</span> <span class='op'>&lt;-</span> <span class='va'>test_df</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span>predicted_Churn_binary <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/if_else.html'>if_else</a></span><span class='op'>(</span><span class='va'>predicted_Churn</span> <span class='op'>&gt;</span> <span class='fl'>0.5</span>, <span class='fl'>1</span>, <span class='fl'>0</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>Confusion Matrix and Statistics
-
-          Reference
-Prediction   0   1
-         0 565  85
-         1   7  10
-                                          
-               Accuracy : 0.8621          
-                 95% CI : (0.8335, 0.8873)
-    No Information Rate : 0.8576          
-    P-Value [Acc &gt; NIR] : 0.3956          
-                                          
-                  Kappa : 0.1415          
-                                          
- Mcnemar&#39;s Test P-Value : 9.923e-16       
-                                          
-            Sensitivity : 0.9878          
-            Specificity : 0.1053          
-         Pos Pred Value : 0.8692          
-         Neg Pred Value : 0.5882          
-             Prevalence : 0.8576          
-         Detection Rate : 0.8471          
-   Detection Prevalence : 0.9745          
-      Balanced Accuracy : 0.5465          
-                                          
-       &#39;Positive&#39; Class : 0               
-                                          </code></pre>
+</div>
+<h3 id="evaluating-predictions">Evaluating Predictions</h3>
+<div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'># F1 Score</span></span>
-<span><span class='va'>f1_score</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/MLmetrics/man/F1_Score.html'>F1_Score</a></span><span class='op'>(</span><span class='va'>test_df</span><span class='op'>$</span><span class='va'>Churn</span>, <span class='va'>test_df</span><span class='op'>$</span><span class='va'>predicted_Churn_binary</span><span class='op'>)</span></span>
-<span><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='st'>"F1 Score:"</span>, <span class='va'>f1_score</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'># Confusion Matrix</span></span>
+<span><span class='va'>TP</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='va'>test_df</span><span class='op'>$</span><span class='va'>predicted_Churn_binary</span> <span class='op'>==</span> <span class='fl'>1</span> <span class='op'>&amp;</span> <span class='va'>test_df</span><span class='op'>$</span><span class='va'>Churn</span> <span class='op'>==</span> <span class='fl'>1</span><span class='op'>)</span></span>
+<span><span class='va'>FP</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='va'>test_df</span><span class='op'>$</span><span class='va'>predicted_Churn_binary</span> <span class='op'>==</span> <span class='fl'>1</span> <span class='op'>&amp;</span> <span class='va'>test_df</span><span class='op'>$</span><span class='va'>Churn</span> <span class='op'>==</span> <span class='fl'>0</span><span class='op'>)</span></span>
+<span><span class='va'>TN</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='va'>test_df</span><span class='op'>$</span><span class='va'>predicted_Churn_binary</span> <span class='op'>==</span> <span class='fl'>0</span> <span class='op'>&amp;</span> <span class='va'>test_df</span><span class='op'>$</span><span class='va'>Churn</span> <span class='op'>==</span> <span class='fl'>0</span><span class='op'>)</span></span>
+<span><span class='va'>FN</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='va'>test_df</span><span class='op'>$</span><span class='va'>predicted_Churn_binary</span> <span class='op'>==</span> <span class='fl'>0</span> <span class='op'>&amp;</span> <span class='va'>test_df</span><span class='op'>$</span><span class='va'>Churn</span> <span class='op'>==</span> <span class='fl'>1</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='st'>"True Positives (TP):"</span>, <span class='va'>TP</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>[1] &quot;F1 Score: 0.924713584288052&quot;</code></pre>
+<pre><code>[1] &quot;True Positives (TP): 25&quot;</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'># AUC</span></span>
-<span><span class='va'>roc_obj</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/pROC/man/roc.html'>roc</a></span><span class='op'>(</span><span class='va'>test_df</span><span class='op'>$</span><span class='va'>Churn</span>, <span class='va'>test_df</span><span class='op'>$</span><span class='va'>predicted_Churn</span><span class='op'>)</span></span>
-<span><span class='va'>auc_value</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/pROC/man/auc.html'>auc</a></span><span class='op'>(</span><span class='va'>roc_obj</span><span class='op'>)</span></span>
-<span><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='st'>"AUC:"</span>, <span class='va'>auc_value</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='st'>"False Positives (FP):"</span>, <span class='va'>FP</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
 </div>
-<pre><code>[1] &quot;AUC: 0.802355539197644&quot;</code></pre>
+<pre><code>[1] &quot;False Positives (FP): 19&quot;</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='st'>"True Negatives (TN):"</span>, <span class='va'>TN</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
 </div>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<pre><code>[1] &quot;True Negatives (TN): 553&quot;</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='st'>"False Negatives (FN):"</span>, <span class='va'>FN</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
+</div>
+<pre><code>[1] &quot;False Negatives (FN): 70&quot;</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'># Calculate Precision, Recall, and F1 Score</span></span>
+<span><span class='va'>precision</span> <span class='op'>&lt;-</span> <span class='va'>TP</span> <span class='op'>/</span> <span class='op'>(</span><span class='va'>TP</span> <span class='op'>+</span> <span class='va'>FP</span><span class='op'>)</span></span>
+<span><span class='va'>recall</span> <span class='op'>&lt;-</span> <span class='va'>TP</span> <span class='op'>/</span> <span class='op'>(</span><span class='va'>TP</span> <span class='op'>+</span> <span class='va'>FN</span><span class='op'>)</span></span>
+<span><span class='va'>f1_score</span> <span class='op'>&lt;-</span> <span class='fl'>2</span> <span class='op'>*</span> <span class='op'>(</span><span class='op'>(</span><span class='va'>precision</span> <span class='op'>*</span> <span class='va'>recall</span><span class='op'>)</span> <span class='op'>/</span> <span class='op'>(</span><span class='va'>precision</span> <span class='op'>+</span> <span class='va'>recall</span><span class='op'>)</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='co'># Print Precision, Recall, and F1 Score</span></span>
+<span><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='st'>"Precision:"</span>, <span class='va'>precision</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
+</div>
+<pre><code>[1] &quot;Precision: 0.568181818181818&quot;</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='st'>"Recall:"</span>, <span class='va'>recall</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
+</div>
+<pre><code>[1] &quot;Recall: 0.263157894736842&quot;</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='st'>"F1 Score:"</span>, <span class='va'>f1_score</span><span class='op'>)</span><span class='op'>)</span></span></code></pre>
+</div>
+<pre><code>[1] &quot;F1 Score: 0.359712230215827&quot;</code></pre>
+</div>
+<h3 id="results">Results</h3>
+<p>We aimed to predict Churn using a telecom dataset using a Logistic Regression model. This was a binary classification where we attempted to train a model to understand the relationships between 20 possible variables and churn to effectively predict churn.</p>
+<p>A subset selection was done in order to identify which variables had the most predictive power and which ones could be removed from the available predictors. Our model that having an international plan was the most significant predictor that indicated a customer will churn(having the highest positive coefficient), while having a voicemail plan was the most significant predictors that indicated a customer will not churn (having the highest negative coefficient).</p>
+<p>The best logistic regression model produced was evaluated against the test set and resulted in an F1-Score of 0.359, which is sub-optimal and perhaps not yet ready for any effective use. However, we did learn that perhaps marketing and including voicemail plans could perhaps lead to a lower churn rate.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>
@@ -2389,6 +2571,15 @@ Prediction   0   1
 <div class="d-appendix">
 </div>
 
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
 
 <!--radix_placeholder_site_after_body-->
 <!--/radix_placeholder_site_after_body-->
