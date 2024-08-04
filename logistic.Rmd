@@ -48,6 +48,8 @@ library(tidymodels)
 library(dplyr)
 ```
 
+[Data Source](https://www.kaggle.com/datasets/mnassrib/telecom-churn-datasets/data)
+
 ```{r}
 train_df <- read_csv("~/STA 631/distill-site/data/churn-bigml-80.csv")
 test_df <- read_csv("~/STA 631/distill-site/data/churn-bigml-20.csv")

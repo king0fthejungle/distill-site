@@ -7,8 +7,6 @@ navbar:
   right:
     - text: "Home"
       href: index.html
-    - text: "About"
-      href: about.html
     - text: "Statistical Learning"
       href: statlearn.html
     - text: "Predicting Churn with Logistic Regression"

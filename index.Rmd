@@ -14,3 +14,12 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ```
 
+## About Me
+
+Hi, I'm Brady Falor. I'm passionate about data science, machine learning, and statistical analysis. 
+
+## Find more about me
+
+- [LinkedIn](https://www.linkedin.com/in/brady-falor/)
+- [Kaggle](https://www.kaggle.com/bfalor/code)
+- [GitHub](https://github.com/king0fthejungle)

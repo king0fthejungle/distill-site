@@ -54,6 +54,7 @@ coin_flips_df <- data.frame(coin_flips_factor)
 ggplot(data = coin_flips_df, aes(x = coin_flips_factor, fill = coin_flips_factor)) +
   geom_bar() +
   geom_text(stat = 'count', aes(label = after_stat(count)), vjust = -0.5) +
+  ylim(0, 60000) +
   labs(title = "Histogram of Coin Flips", x = "Outcome", y = "Frequency") +
   scale_fill_manual(values = c("Heads" = "red", "Tails" = "blue")) +
   theme_minimal() +
